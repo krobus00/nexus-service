@@ -1,0 +1,7 @@
+env: "development"
+log_level: "info" # info|warm|error
+ports:
+  http: "7000"
+services:
+  auth_grpc: "localhost:5000"
+  storage_grpc: "localhost:5001"

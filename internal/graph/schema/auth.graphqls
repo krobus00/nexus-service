@@ -1,0 +1,39 @@
+input Register {
+  fullName: String!
+  email: String!
+  username: String!
+  password: String!
+}
+
+input Login {
+  username: String!
+  password: String!
+}
+
+input RefreshToken {
+  refreshToken: String!
+}
+
+type AuthResponse {
+  accessToken: String!
+  refreshToken: String!
+}
+
+type User {
+  id: String!
+  fullName: String!
+  username: String!
+  email: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Mutation {
+  register(input: Register!): AuthResponse!
+  login(input: Login!): AuthResponse!
+  refreshToken(input: RefreshToken!): AuthResponse!
+}
+
+type Query {
+  getUserInfo: User!
+}
