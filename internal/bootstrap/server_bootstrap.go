@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -16,6 +15,8 @@ import (
 	"github.com/krobus00/nexus-service/internal/graph"
 	"github.com/krobus00/nexus-service/internal/infrastructure"
 	"github.com/krobus00/nexus-service/internal/model"
+	productPB "github.com/krobus00/product-service/pb/product"
+	storagePB "github.com/krobus00/storage-service/pb/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	log "github.com/sirupsen/logrus"
@@ -31,9 +32,23 @@ func StartServer() {
 	continueOrFatal(err)
 	authClient := authPB.NewAuthServiceClient(authConn)
 
+	storageConn, err := grpc.Dial(config.StorageGRPCHost(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	continueOrFatal(err)
+	storageClient := storagePB.NewStorageServiceClient(storageConn)
+
+	productConn, err := grpc.Dial(config.ProductGRPCHost(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	continueOrFatal(err)
+	productClient := productPB.NewProductServiceClient(productConn)
+
 	// init resolver
 	resolver := graph.NewResolver()
-	resolver.InjectAuthClient(authClient)
+	err = resolver.InjectAuthClient(authClient)
+	continueOrFatal(err)
+	err = resolver.InjectStorageClient(storageClient)
+	continueOrFatal(err)
+	err = resolver.InjectProductClient(productClient)
+	continueOrFatal(err)
+
 	graphQLHandler := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	playgroundHandler := playground.Handler("GraphQL", "/query")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -59,8 +74,7 @@ func StartServer() {
 	}()
 	log.Info(fmt.Sprintf("http server started on :%s", config.HTTPPort()))
 
-	wait := gracefulShutdown(context.Background(), 30*time.Second, map[string]operation{
-
+	wait := gracefulShutdown(context.Background(), config.GracefulShutdownTimeOut(), map[string]operation{
 		"http": func(ctx context.Context) error {
 			return e.Shutdown(ctx)
 		},
@@ -73,7 +87,7 @@ func decodeJWTToken() echo.MiddlewareFunc {
 		return func(eCtx echo.Context) error {
 			res := model.NewResponse().WithMessage(model.ErrTokenInvalid.Error())
 			accessToken := eCtx.Request().Header.Get("Authorization")
-			accessToken = strings.Replace(accessToken, "Bearer ", "", -1)
+			accessToken = strings.ReplaceAll(accessToken, "Bearer ", "")
 
 			token, _ := jwt.Parse(accessToken, nil)
 			if token == nil {
@@ -84,12 +98,19 @@ func decodeJWTToken() echo.MiddlewareFunc {
 			if !ok {
 				return eCtx.JSON(http.StatusUnauthorized, res)
 			}
+
 			userID, ok := claims["userID"]
 			if !ok {
 				return eCtx.JSON(http.StatusUnauthorized, res)
 			}
 
+			tokenID, ok := claims["jti"]
+			if !ok {
+				return eCtx.JSON(http.StatusUnauthorized, res)
+			}
+
 			ctx := context.WithValue(eCtx.Request().Context(), constant.KeyUserIDCtx, userID)
+			ctx = context.WithValue(ctx, constant.KeyTokenIDCtx, tokenID)
 			eCtx.SetRequest(eCtx.Request().WithContext(ctx))
 			return next(eCtx)
 		}
