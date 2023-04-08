@@ -34,7 +34,7 @@ input UpdateProduct {
 
 extend type Mutation {
   createProduct(input: CreateProduct!): Product!
-  upateProduct(input: UpdateProduct!): Product!
+  updateProduct(input: UpdateProduct!): Product!
   deleteProductByID(id: String!): Boolean!
 }
 

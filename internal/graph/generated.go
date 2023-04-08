@@ -59,7 +59,7 @@ type ComplexityRoot struct {
 		Logout            func(childComplexity int) int
 		RefreshToken      func(childComplexity int) int
 		Register          func(childComplexity int, input model.Register) int
-		UpateProduct      func(childComplexity int, input model.UpdateProduct) int
+		UpdateProduct     func(childComplexity int, input model.UpdateProduct) int
 	}
 
 	Object struct {
@@ -123,7 +123,7 @@ type MutationResolver interface {
 	RefreshToken(ctx context.Context) (*model.AuthResponse, error)
 	Logout(ctx context.Context) (bool, error)
 	CreateProduct(ctx context.Context, input model.CreateProduct) (*model.Product, error)
-	UpateProduct(ctx context.Context, input model.UpdateProduct) (*model.Product, error)
+	UpdateProduct(ctx context.Context, input model.UpdateProduct) (*model.Product, error)
 	DeleteProductByID(ctx context.Context, id string) (bool, error)
 }
 type ProductResolver interface {
@@ -227,17 +227,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Register(childComplexity, args["input"].(model.Register)), true
 
-	case "Mutation.upateProduct":
-		if e.complexity.Mutation.UpateProduct == nil {
+	case "Mutation.updateProduct":
+		if e.complexity.Mutation.UpdateProduct == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_upateProduct_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_updateProduct_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpateProduct(childComplexity, args["input"].(model.UpdateProduct)), true
+		return e.complexity.Mutation.UpdateProduct(childComplexity, args["input"].(model.UpdateProduct)), true
 
 	case "Object.createdAt":
 		if e.complexity.Object.CreatedAt == nil {
@@ -686,7 +686,7 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_upateProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.UpdateProduct
@@ -1222,8 +1222,8 @@ func (ec *executionContext) fieldContext_Mutation_createProduct(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_upateProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_upateProduct(ctx, field)
+func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateProduct(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1236,7 +1236,7 @@ func (ec *executionContext) _Mutation_upateProduct(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpateProduct(rctx, fc.Args["input"].(model.UpdateProduct))
+		return ec.resolvers.Mutation().UpdateProduct(rctx, fc.Args["input"].(model.UpdateProduct))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1253,7 +1253,7 @@ func (ec *executionContext) _Mutation_upateProduct(ctx context.Context, field gr
 	return ec.marshalNProduct2ᚖgithubᚗcomᚋkrobus00ᚋnexusᚑserviceᚋinternalᚋgraphᚋmodelᚐProduct(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_upateProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updateProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1292,7 +1292,7 @@ func (ec *executionContext) fieldContext_Mutation_upateProduct(ctx context.Conte
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_upateProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -5684,10 +5684,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "upateProduct":
+		case "updateProduct":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_upateProduct(ctx, field)
+				return ec._Mutation_updateProduct(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
