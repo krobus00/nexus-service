@@ -1,0 +1,1 @@
+directive @binding(constraint: String!, field: String!) on INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION

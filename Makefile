@@ -8,6 +8,7 @@ DOCKER_IMAGE_NAME=krobus00/${SERVICE_NAME}
 CONFIG?=./config.yml
 NAMESPACE?=default
 PACKAGE_NAME=github.com/krobus00/${SERVICE_NAME}
+build_args=-ldflags "-s -w -X $(PACKAGE_NAME)/internal/config.serviceVersion=$(VERSION) -X $(PACKAGE_NAME)/internal/config.serviceName=$(SERVICE_NAME)"
 
 # make tidy
 tidy:
@@ -32,10 +33,10 @@ lint:
 run:
 ifeq (dev server, $(filter dev server,$(MAKECMDGOALS)))
 	$(eval launch_args=server $(launch_args))
-	air --build.cmd 'go build -ldflags "-s -w -X $(PACKAGE_NAME)/internal/config.serviceVersion=$(VERSION) -X $(PACKAGE_NAME)/internal/config.serviceName=$(SERVICE_NAME)" -o bin/nexus-service main.go' --build.bin "./bin/nexus-service $(launch_args)"
+	air --build.cmd 'go build $(build_args) -o bin/nexus-service main.go' --build.bin "./bin/nexus-service $(launch_args)"
 else ifeq (dev worker, $(filter dev worker,$(MAKECMDGOALS)))
 	$(eval launch_args=worker $(launch_args))
-	air --build.cmd 'go build -ldflags "-s -w -X $(PACKAGE_NAME)/internal/config.serviceVersion=$(VERSION) -X $(PACKAGE_NAME)/internal/config.serviceName=$(SERVICE_NAME)" -o bin/nexus-service main.go' --build.bin "./bin/nexus-service $(launch_args)"
+	air --build.cmd 'go build $(build_args) -o bin/nexus-service main.go' --build.bin "./bin/nexus-service $(launch_args)"
 else ifeq (worker, $(filter worker,$(MAKECMDGOALS)))
 	$(eval launch_args=worker $(launch_args))
 	$(shell if test -s ./bin/nexus-service; then ./bin/nexus-service $(launch_args); else echo nexus binary not found; fi)
@@ -47,7 +48,7 @@ endif
 # make build
 build:
 	# build binary file
-	go build -ldflags "-s -w -X $(PACKAGE_NAME)/internal/config.serviceVersion=$(VERSION) -X $(PACKAGE_NAME)/internal/config.serviceName=$(SERVICE_NAME)" -o ./bin/nexus-service ./main.go
+	go build $(build_args) -o ./bin/nexus-service ./main.go
 ifeq (, $(shell which upx))
 	$(warning "upx not installed")
 else

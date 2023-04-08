@@ -11,5 +11,5 @@ type Object {
 
 
 extend type Query {
-  findObjectByID(id: String!): Object!
+  findObjectByID(id: String! @binding(constraint: "required,uuid4", field:"id")): Object!
 }
