@@ -1,7 +1,10 @@
 env: "development"
 log_level: "info" # info|warm|error
 ports:
-  http: "7000"
+  http: "8000"
+  metrics: "7000"
+graceful_shutdown_timeout: "30s"
 services:
-  auth_grpc: "localhost:5000"
-  storage_grpc: "localhost:5001"
+  auth_grpc: "localhost:9180"
+  storage_grpc: "localhost:9181"
+  product_grpc: "localhost:9182"

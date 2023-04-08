@@ -1,0 +1,15 @@
+type Object {
+  id: String!
+  fileName: String!
+  type: String!
+  signedUrl: String!
+  expiredAt: String!
+  isPublic: Boolean!
+  uploadedBy: String!
+  createdAt: String!
+}
+
+
+extend type Query {
+  findObjectByID(id: String!): Object!
+}
