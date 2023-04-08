@@ -6,6 +6,19 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	serviceName    = ""
+	serviceVersion = ""
+)
+
+func ServiceName() string {
+	return serviceName
+}
+
+func ServiceVersion() string {
+	return serviceVersion
+}
+
 // Env :nodoc:
 func Env() string {
 	return viper.GetString("env")
@@ -24,6 +37,16 @@ func HTTPPort() string {
 // AuthGRPCHost :nodoc:
 func AuthGRPCHost() string {
 	return viper.GetString("services.auth_grpc")
+}
+
+// StorageGRPCHost :nodoc:
+func StorageGRPCHost() string {
+	return viper.GetString("services.storage_grpc")
+}
+
+// ProductGRPCHost :nodoc:
+func ProductGRPCHost() string {
+	return viper.GetString("services.product_grpc")
 }
 
 func LoadConfig() error {

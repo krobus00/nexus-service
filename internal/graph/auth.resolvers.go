@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/krobus00/auth-service/pb/auth"
 	"github.com/krobus00/nexus-service/internal/graph/model"
@@ -23,17 +22,20 @@ func (r *mutationResolver) Register(ctx context.Context, input model.Register) (
 		Username: input.Username,
 		Password: input.Password,
 	})
-	if err != nil {
-		if e, ok := status.FromError(err); ok {
-			switch e.Code() {
-			case codes.FailedPrecondition:
-				return nil, gqlerror.Errorf(e.Message())
-			default:
-				return nil, gqlerror.Errorf("internal server error")
-			}
-		}
-		return nil, gqlerror.Errorf("internal server error")
+
+	e, ok := status.FromError(err)
+	if !ok {
+		return nil, model.ErrInternal
 	}
+
+	switch e.Code() {
+	case codes.OK:
+	case codes.FailedPrecondition:
+		return nil, gqlerror.Errorf(e.Message())
+	default:
+		return nil, model.ErrInternal
+	}
+
 	return &model.AuthResponse{
 		AccessToken:  res.AccessToken,
 		RefreshToken: res.RefreshToken,
@@ -46,17 +48,20 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (*model
 		Username: input.Username,
 		Password: input.Password,
 	})
-	if err != nil {
-		if e, ok := status.FromError(err); ok {
-			switch e.Code() {
-			case codes.FailedPrecondition:
-				return nil, gqlerror.Errorf(e.Message())
-			default:
-				return nil, gqlerror.Errorf("internal server error")
-			}
-		}
-		return nil, gqlerror.Errorf("internal server error")
+
+	e, ok := status.FromError(err)
+	if !ok {
+		return nil, model.ErrInternal
 	}
+
+	switch e.Code() {
+	case codes.OK:
+	case codes.FailedPrecondition, codes.NotFound:
+		return nil, gqlerror.Errorf(e.Message())
+	default:
+		return nil, model.ErrInternal
+	}
+
 	return &model.AuthResponse{
 		AccessToken:  res.AccessToken,
 		RefreshToken: res.RefreshToken,
@@ -64,30 +69,81 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (*model
 }
 
 // RefreshToken is the resolver for the refreshToken field.
-func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshToken) (*model.AuthResponse, error) {
-	panic(fmt.Errorf("not implemented: RefreshToken - refreshToken"))
+func (r *mutationResolver) RefreshToken(ctx context.Context) (*model.AuthResponse, error) {
+	userID := getUserIDFromCtx(ctx)
+	tokenID := getTokenIDFromCtx(ctx)
+
+	res, err := r.authClient.RefreshToken(ctx, &auth.RefreshTokenRequest{
+		SessionUserId: userID,
+		TokenId:       tokenID,
+	})
+
+	e, ok := status.FromError(err)
+	if !ok {
+		return nil, model.ErrInternal
+	}
+
+	switch e.Code() {
+	case codes.OK:
+	case codes.FailedPrecondition, codes.NotFound, codes.Unauthenticated:
+		return nil, gqlerror.Errorf(e.Message())
+	default:
+		return nil, model.ErrInternal
+	}
+
+	return &model.AuthResponse{
+		AccessToken:  res.AccessToken,
+		RefreshToken: res.RefreshToken,
+	}, nil
 }
 
-// GetUserInfo is the resolver for the getUserInfo field.
-func (r *queryResolver) GetUserInfo(ctx context.Context) (*model.User, error) {
-	userID, err := getUserIDFromCtx(ctx)
-	if err != nil {
-		return nil, err
+// Logout is the resolver for the logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
+	userID := getUserIDFromCtx(ctx)
+	tokenID := getTokenIDFromCtx(ctx)
+
+	_, err := r.authClient.Logout(ctx, &auth.LogoutRequest{
+		SessionUserId: userID,
+		TokenId:       tokenID,
+	})
+
+	e, ok := status.FromError(err)
+	if !ok {
+		return false, model.ErrInternal
 	}
+
+	switch e.Code() {
+	case codes.OK:
+	case codes.FailedPrecondition, codes.NotFound, codes.Unauthenticated:
+		return false, gqlerror.Errorf(e.Message())
+	default:
+		return false, model.ErrInternal
+	}
+
+	return true, nil
+}
+
+// UserInfo is the resolver for the userInfo field.
+func (r *queryResolver) UserInfo(ctx context.Context) (*model.User, error) {
+	userID := getUserIDFromCtx(ctx)
+
 	res, err := r.authClient.GetUserInfo(ctx, &auth.GetUserInfoRequest{
 		UserId: userID,
 	})
-	if err != nil {
-		if e, ok := status.FromError(err); ok {
-			switch e.Code() {
-			case codes.FailedPrecondition:
-				return nil, gqlerror.Errorf(e.Message())
-			default:
-				return nil, gqlerror.Errorf("internal server error")
-			}
-		}
-		return nil, gqlerror.Errorf("internal server error")
+
+	e, ok := status.FromError(err)
+	if !ok {
+		return nil, model.ErrInternal
 	}
+
+	switch e.Code() {
+	case codes.OK:
+	case codes.FailedPrecondition, codes.NotFound, codes.Unauthenticated:
+		return nil, gqlerror.Errorf(e.Message())
+	default:
+		return nil, model.ErrInternal
+	}
+
 	return &model.User{
 		ID:        res.GetId(),
 		FullName:  res.GetFullName(),

@@ -1,3 +1,12 @@
+type User {
+  id: String!
+  fullName: String!
+  username: String!
+  email: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
 input Register {
   fullName: String!
   email: String!
@@ -19,21 +28,13 @@ type AuthResponse {
   refreshToken: String!
 }
 
-type User {
-  id: String!
-  fullName: String!
-  username: String!
-  email: String!
-  createdAt: String!
-  updatedAt: String!
-}
-
 type Mutation {
   register(input: Register!): AuthResponse!
   login(input: Login!): AuthResponse!
-  refreshToken(input: RefreshToken!): AuthResponse!
+  refreshToken: AuthResponse!
+  logout: Boolean!
 }
 
 type Query {
-  getUserInfo: User!
+  userInfo: User!
 }

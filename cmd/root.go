@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/krobus00/nexus-service/internal/config"
@@ -25,8 +26,10 @@ func Execute() {
 	}
 }
 
-func init() {
+func Init() {
 	if err := config.LoadConfig(); err != nil {
 		log.Fatalln(err.Error())
 	}
+
+	log.Info(fmt.Sprintf("starting %s:%s...", config.ServiceName(), config.ServiceVersion()))
 }

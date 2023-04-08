@@ -5,7 +5,9 @@ go 1.18
 require (
 	github.com/99designs/gqlgen v0.17.26
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/krobus00/auth-service v0.2.2
+	github.com/krobus00/auth-service v0.4.1
+	github.com/krobus00/product-service v0.3.0
+	github.com/krobus00/storage-service v0.5.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1

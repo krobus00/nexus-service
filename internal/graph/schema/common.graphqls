@@ -1,0 +1,16 @@
+input PaginationRequest {
+  search: String!
+  sort: [String!]!
+  limit: Int!
+  page: Int!
+  includeDeleted: Boolean!
+}
+
+type PaginationMeta {
+  search: String!
+  sort: [String!]!
+  limit: Int!
+  page: Int!
+  count: Int!
+  maxPage: Int!
+}

@@ -1,0 +1,44 @@
+type Product {
+  id: String!
+  name: String!
+  description: String!
+  price: Float!
+  thumbnailID: String!
+  thumbnail: Object!
+  ownerID: String!
+  createdAt: String!
+  updatedAt: String!
+  deletedAt: String!
+}
+
+type ProductPaginationResponse {
+  meta: PaginationMeta!
+  items: [Product!]!
+}
+
+
+input CreateProduct {
+  name: String!
+  description: String!
+  price: Float!
+  thumbnailID: String!
+}
+
+input UpdateProduct {
+  id: String!
+  name: String!
+  description: String!
+  price: Float!
+  thumbnailID: String!
+}
+
+extend type Mutation {
+  createProduct(input: CreateProduct!): Product!
+  upateProduct(input: UpdateProduct!): Product!
+  deleteProductByID(id: String!): Boolean!
+}
+
+extend type Query {
+  findProductByID(id: String!): Product!
+  findProducts(input: PaginationRequest): ProductPaginationResponse!
+}
