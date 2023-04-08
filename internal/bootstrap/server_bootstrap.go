@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -75,7 +74,7 @@ func StartServer() {
 	}()
 	log.Info(fmt.Sprintf("http server started on :%s", config.HTTPPort()))
 
-	wait := gracefulShutdown(context.Background(), 30*time.Second, map[string]operation{
+	wait := gracefulShutdown(context.Background(), config.GracefulShutdownTimeOut(), map[string]operation{
 		"http": func(ctx context.Context) error {
 			return e.Shutdown(ctx)
 		},
@@ -88,7 +87,7 @@ func decodeJWTToken() echo.MiddlewareFunc {
 		return func(eCtx echo.Context) error {
 			res := model.NewResponse().WithMessage(model.ErrTokenInvalid.Error())
 			accessToken := eCtx.Request().Header.Get("Authorization")
-			accessToken = strings.Replace(accessToken, "Bearer ", "", -1)
+			accessToken = strings.ReplaceAll(accessToken, "Bearer ", "")
 
 			token, _ := jwt.Parse(accessToken, nil)
 			if token == nil {

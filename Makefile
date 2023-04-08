@@ -19,7 +19,7 @@ generate:
 
 # make lint
 lint:
-	golangci-lint run --disable-all -E errcheck -E misspell -E revive -E goimports
+	golangci-lint run
 
 # make run dev server
 # make run dev worker
@@ -80,6 +80,10 @@ ifeq (, $(shell which richgo))
 else
 	richgo test $(cover_args)
 endif
+
+# make changelog VERSION=vx.x.x
+changelog: tidy generate lint
+	git-chglog -o CHANGELOG.md --next-tag $(VERSION)
 
 %:
 	@:

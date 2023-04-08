@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -19,34 +20,33 @@ func ServiceVersion() string {
 	return serviceVersion
 }
 
-// Env :nodoc:
 func Env() string {
 	return viper.GetString("env")
 }
 
-// LogLevel :nodoc:
 func LogLevel() string {
 	return viper.GetString("log_level")
 }
 
-// HTTPPort :nodoc:
 func HTTPPort() string {
 	return viper.GetString("ports.http")
 }
 
-// AuthGRPCHost :nodoc:
 func AuthGRPCHost() string {
 	return viper.GetString("services.auth_grpc")
 }
 
-// StorageGRPCHost :nodoc:
 func StorageGRPCHost() string {
 	return viper.GetString("services.storage_grpc")
 }
 
-// ProductGRPCHost :nodoc:
 func ProductGRPCHost() string {
 	return viper.GetString("services.product_grpc")
+}
+
+func GracefulShutdownTimeOut() time.Duration {
+	cfg := viper.GetString("graceful_shutdown_timeout")
+	return parseDuration(cfg, DefaultGracefulShutdownTimeOut)
 }
 
 func LoadConfig() error {
@@ -61,4 +61,12 @@ func LoadConfig() error {
 		return err
 	}
 	return nil
+}
+
+func parseDuration(in string, defaultDuration time.Duration) time.Duration {
+	dur, err := time.ParseDuration(in)
+	if err != nil {
+		return defaultDuration
+	}
+	return dur
 }
