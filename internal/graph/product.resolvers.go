@@ -54,8 +54,8 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, input model.Create
 	}, nil
 }
 
-// UpateProduct is the resolver for the upateProduct field.
-func (r *mutationResolver) UpateProduct(ctx context.Context, input model.UpdateProduct) (*model.Product, error) {
+// UpdateProduct is the resolver for the updateProduct field.
+func (r *mutationResolver) UpdateProduct(ctx context.Context, input model.UpdateProduct) (*model.Product, error) {
 	userID := getUserIDFromCtx(ctx)
 
 	product, err := r.productClient.Update(ctx, &product.UpdateProductRequest{
