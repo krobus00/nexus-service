@@ -21,7 +21,7 @@ func init() {
 	en := en.New()
 	uni := ut.New(en, en)
 	trans, _ = uni.GetTranslator("en")
-	en_translations.RegisterDefaultTranslations(validate, trans)
+	_ = en_translations.RegisterDefaultTranslations(validate, trans)
 }
 
 func Binding(ctx context.Context, obj interface{}, next graphql.Resolver, constraint string, field string) (interface{}, error) {
@@ -35,7 +35,10 @@ func Binding(ctx context.Context, obj interface{}, next graphql.Resolver, constr
 
 	err = validate.Var(val, constraint)
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			return val, nil
+		}
 		transErr := fmt.Errorf("%s%+v", field, validationErrors[0].Translate(trans))
 		return val, transErr
 	}
@@ -44,7 +47,7 @@ func Binding(ctx context.Context, obj interface{}, next graphql.Resolver, constr
 }
 
 func ValidateAddTranslation(tag string, message string) {
-	validate.RegisterTranslation(tag, trans, func(ut ut.Translator) error {
+	_ = validate.RegisterTranslation(tag, trans, func(ut ut.Translator) error {
 		return ut.Add(tag, message, true) // see universal-translator for details
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T(tag, fe.Field())
