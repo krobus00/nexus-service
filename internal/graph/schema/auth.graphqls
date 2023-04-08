@@ -8,19 +8,15 @@ type User {
 }
 
 input Register {
-  fullName: String!
-  email: String!
-  username: String!
-  password: String!
+  fullName: String! @binding(constraint: "required,min=4,max=32", field:"fullName")
+  email: String! @binding(constraint: "required,email", field:"email")
+  username: String! @binding(constraint: "required,min=4,max=32", field:"username")
+  password: String! @binding(constraint: "required,min=4,max=32", field:"password")
 }
 
 input Login {
-  username: String!
-  password: String!
-}
-
-input RefreshToken {
-  refreshToken: String!
+  username: String! @binding(constraint: "required,min=4,max=32", field:"username")
+  password: String! @binding(constraint: "required,min=4,max=32", field:"password")
 }
 
 type AuthResponse {

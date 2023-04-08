@@ -65,10 +65,6 @@ type ProductPaginationResponse struct {
 	Items []*Product      `json:"items"`
 }
 
-type RefreshToken struct {
-	RefreshToken string `json:"refreshToken"`
-}
-
 type Register struct {
 	FullName string `json:"fullName"`
 	Email    string `json:"email"`
