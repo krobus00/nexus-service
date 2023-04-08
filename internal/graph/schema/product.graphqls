@@ -18,18 +18,18 @@ type ProductPaginationResponse {
 
 
 input CreateProduct {
-  name: String!
-  description: String!
-  price: Float!
-  thumbnailID: String!
+  name: String! @binding(constraint: "required,min=4,max=255", field:"name")
+  description: String! @binding(constraint: "required,min=4,max=1000", field:"description")
+  price: Float! @binding(constraint: "required,min=10000,max=10000000", field:"price")
+  thumbnailID: String! @binding(constraint: "required,uuid4", field:"thumbnail")
 }
 
 input UpdateProduct {
-  id: String!
-  name: String!
-  description: String!
-  price: Float!
-  thumbnailID: String!
+  id: String! @binding(constraint: "required,uuid4", field:"id")
+  name: String! @binding(constraint: "required,min=4,max=255", field:"name")
+  description: String! @binding(constraint: "required,min=4,max=1000", field:"description")
+  price: Float! @binding(constraint: "required,min=10000,max=10000000", field:"price")
+  thumbnailID: String! @binding(constraint: "required,uuid4", field:"thumbnail")
 }
 
 extend type Mutation {
@@ -39,6 +39,6 @@ extend type Mutation {
 }
 
 extend type Query {
-  findProductByID(id: String!): Product!
+  findProductByID(id: String! @binding(constraint: "required,uuid4", field:"id")): Product!
   findProducts(input: PaginationRequest): ProductPaginationResponse!
 }

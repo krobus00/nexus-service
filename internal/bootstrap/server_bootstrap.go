@@ -13,6 +13,7 @@ import (
 	"github.com/krobus00/nexus-service/internal/config"
 	"github.com/krobus00/nexus-service/internal/constant"
 	"github.com/krobus00/nexus-service/internal/graph"
+	"github.com/krobus00/nexus-service/internal/graph/directive"
 	"github.com/krobus00/nexus-service/internal/infrastructure"
 	"github.com/krobus00/nexus-service/internal/model"
 	productPB "github.com/krobus00/product-service/pb/product"
@@ -49,7 +50,10 @@ func StartServer() {
 	err = resolver.InjectProductClient(productClient)
 	continueOrFatal(err)
 
-	graphQLHandler := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
+	c := graph.Config{Resolvers: resolver}
+	c.Directives.Binding = directive.Binding
+
+	graphQLHandler := handler.NewDefaultServer(graph.NewExecutableSchema(c))
 	playgroundHandler := playground.Handler("GraphQL", "/query")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
